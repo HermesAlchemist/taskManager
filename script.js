@@ -120,7 +120,7 @@ function criarTarefa(event) {
             horaInicio: horaInicio,
             dataTermino: dataTermino,
             horaTermino: horaTermino,
-            status: 'Pendente', // Adicionado o status 'Pendente'
+            status: false, // Adicionado o status 'Pendente'
             id: Math.random()*1000000
         };
 
@@ -226,72 +226,6 @@ function alterarTarefa(titulo) {
     } else {
         console.error('Usuário não encontrado na lista de usuários.');
     }
-}
-
-// Função para preencher corretamente o formulário no modal após clicar em "Alterar"
-function preencherFormularioNoModal() {
-    // Preencher os campos do formulário no modal
-    document.getElementById('inputTarefaModal').value = tarefa.titulo;
-    document.getElementById('inputDataInicioModal').value = tarefa.dataInicio;
-    document.getElementById('inputHoraInicioModal').value = tarefa.horaInicio;
-    document.getElementById('inputDataTerminoModal').value = tarefa.dataTermino;
-    document.getElementById('inputHoraTerminoModal').value = tarefa.horaTermino;
-    document.getElementById('inputDescricaoModal').value = tarefa.descricao;
-}
-
-// Alteração na função alterarTarefaSubmit()
-function alterarTarefaSubmit() {
-    // Lógica para alterar a tarefa e atualizar a tabela
-    // ...
-
-    // Ocultar os botões de ação após a conclusão
-    ocultarBotoesAcaoNoModal();
-}
-
-// Função para ocultar os botões de ação no modal
-function ocultarBotoesAcaoNoModal() {
-    document.getElementById('btnAlterar').style.display = 'none';
-    document.getElementById('btnRemover').style.display = 'none';
-    document.getElementById('btnMarcarRealizada').style.display = 'none';
-    document.getElementById('btnMarcarNaoRealizada').style.display = 'none';
-    document.getElementById('btnCancelar').style.display = 'none';
-}
-
-// Alteração nas demais funções relacionadas a alterações no modal
-function removerTarefa() {
-    // Lógica para remover a tarefa e atualizar a tabela
-    // ...
-
-    // Ocultar os botões de ação após a conclusão
-    ocultarBotoesAcaoNoModal();
-}
-
-function marcarComoRealizada() {
-    // Lógica para marcar a tarefa como realizada e atualizar a tabela
-    // ...
-
-    // Ocultar os botões de ação após a conclusão
-    ocultarBotoesAcaoNoModal();
-}
-
-function marcarComoNaoRealizada() {
-    // Lógica para marcar a tarefa como não realizada e atualizar a tabela
-    // ...
-
-    // Ocultar os botões de ação após a conclusão
-    ocultarBotoesAcaoNoModal();
-}
-
-function cancelarAcao() {
-    // Limpar o formulário e ocultar os botões de ação
-    document.getElementById('inputTarefaModal').value = '';
-    document.getElementById('inputDataInicioModal').value = '';
-    document.getElementById('inputHoraInicioModal').value = '';
-    document.getElementById('inputDataTerminoModal').value = '';
-    document.getElementById('inputHoraTerminoModal').value = '';
-    document.getElementById('inputDescricaoModal').value = '';
-
-    ocultarBotoesAcaoNoModal();
 }
 
 // Edit starting function
