@@ -1,39 +1,69 @@
-// <!-- Script JavaScript -->
     // Função para criar um usuário
-    function criarUsuario() {
+    function criarUsuario(event) {
+        event.preventDefault();
+
         var nome = document.getElementById('nomeUsuario').value;
         var email = document.getElementById('cadastroEmail').value;
         var senha = document.getElementById('cadastroSenha').value;
 
-        var usuario = {
+        // Obter usuários existentes do localStorage
+        var usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+
+        // Verificar se o email já está cadastrado
+        var usuarioExistente = usuarios.find(function (user) {
+            return user.email === email;
+        });
+
+        if (usuarioExistente) {
+            alert('Este e-mail já está cadastrado. Por favor, use outro e-mail.');
+            return false;
+        }
+
+        var novoUsuario = {
             nome: nome,
             email: email,
             senha: senha,
             tarefas: [] // Inicializa as tarefas como uma lista vazia
         };
 
-        localStorage.setItem('usuario', JSON.stringify(usuario));
+        // Adicionar o novo usuário à lista de usuários
+        usuarios.push(novoUsuario);
+
+        // Salvar a lista atualizada no localStorage
+        localStorage.setItem('usuarios', JSON.stringify(usuarios));
+
+        alert('Cadastro realizado com sucesso!');
+        // Você pode redirecionar para a página de login ou outra página se desejar
 
         return false; // Impede o formulário de ser enviado
     }
 
     // Função para fazer login
     function fazerLogin(event) {
-        event.preventDefault()
+        event.preventDefault();
+
         var email = document.getElementById('loginEmail').value;
         var senha = document.getElementById('loginSenha').value;
 
-        // Obtém o usuário do localStorage
-        var usuario = JSON.parse(localStorage.getItem('usuario'));
+        // Obter usuários existentes do localStorage
+        var usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
 
-        // Verifica se o usuário existe e a senha está correta
-        if (usuario && usuario.email === email && usuario.senha === senha) {
-            // Login bem-sucedido / ALERT
-            alert("Login feito com sucesso!");
+        // Procurar o usuário com o email fornecido
+        var usuario = usuarios.find(function (user) {
+            return user.email === email && user.senha === senha;
+        });
 
-            // Atualiza o texto da barra de navegação com o nome do usuário
-            // Redireciona para a página logged.html
-            window.location.href = 'http://127.0.0.1:5500/logged.html';
+        // Verificar se o usuário existe e a senha está correta
+        if (usuario) {
+            // Login bem-sucedido
+
+            // Armazenar o usuário logado no localStorage
+            localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+
+            alert('Login feito com sucesso!');
+
+            // Redirecionar para a página logada ou outra página, se desejar
+            window.location.href = '/logged.html';
         } else {
             // Login falhou
             alert('Login falhou. Verifique suas credenciais.');
@@ -44,63 +74,272 @@
 
     // Função para atualizar o texto da barra de navegação
     function atualizarTextoNavbar() {
-        var usuario = JSON.parse(localStorage.getItem('usuario'));
+        var usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+        var navbarBrand = document.querySelector('.navbar-brand');
+        var btnSair = document.querySelector('#btnSair');
 
-        // Verificar se o usuário está definido para evitar erros
-        if (usuario && usuario.nome) {
-
-            document.querySelector('.navbar-brand').innerHTML = `Bem-vindo, ${usuario.nome}!`;
+        if (usuarioLogado && usuarioLogado.nome) {
+            navbarBrand.innerHTML = `Bem-vindo, ${usuarioLogado.nome}!`;
+            
+            // Adicionar evento de clique ao botão "Sair"
+            btnSair.addEventListener('click', fazerLogout);
         } else {
             console.error('Usuário não encontrado ou nome não definido.');
         }
     }
 
+
     // Função para criar uma tarefa e associá-la ao usuário
-    function criarTarefa() {
-        // Obter os valores dos campos
-        var tarefa = document.getElementById('inputTarefa').value;
-        var dataInicio = document.getElementById('inputDataInicio').value;
-        var horaInicio = document.getElementById('inputHoraInicio').value;
-        var dataTermino = document.getElementById('inputDataTermino').value;
-        var horaTermino = document.getElementById('inputHoraTermino').value;
-        var descricao = document.getElementById('inputDescricao').value;
+// Alteração em criarTarefa()
+function criarTarefa(event) {
+    event.preventDefault();
 
-        // Obter o usuário do localStorage
-        var usuario = JSON.parse(localStorage.getItem('usuario')) || { tarefas: [] };
+    // Obter os valores dos campos
+    var tarefa = document.getElementById('inputTarefa').value;
+    var dataInicio = document.getElementById('inputDataInicio').value;
+    var horaInicio = document.getElementById('inputHoraInicio').value;
+    var dataTermino = document.getElementById('inputDataTermino').value;
+    var horaTermino = document.getElementById('inputHoraTermino').value;
+    var descricao = document.getElementById('inputDescricao').value;
 
-        // Criar a nova tarefa
+    // Obter a lista completa de usuários do localStorage
+    var usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+
+    // Encontrar o usuário logado na lista de usuários
+    var usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+    var usuario = usuarios.find(function (user) {
+        return user.email === usuarioLogado.email;
+    });
+
+    if (usuario) {
+        // Criar a nova tarefa com status 'Pendente'
         var novaTarefa = {
             titulo: tarefa,
             descricao: descricao,
             dataInicio: dataInicio,
             horaInicio: horaInicio,
             dataTermino: dataTermino,
-            horaTermino: horaTermino
+            horaTermino: horaTermino,
+            status: 'Pendente', // Adicionado o status 'Pendente'
+            id: Math.random()*1000000
         };
 
         // Adicionar a nova tarefa à lista de tarefas do usuário
         usuario.tarefas.push(novaTarefa);
 
         // Atualizar os dados do usuário no localStorage
-        localStorage.setItem('usuario', JSON.stringify(usuario));
+        localStorage.setItem('usuarios', JSON.stringify(usuarios));
 
-        // Criar uma nova linha na tabela
-        var tableBody = document.getElementById('tarefasTableBody');
-        var newRow = tableBody.insertRow();
-        newRow.innerHTML = `<td class="col-5"><a href="#" onclick="exibirDescricao('${tarefa}', '${descricao}')" data-bs-toggle="modal" data-bs-target="#exampleModal">${tarefa}</a></td>
-                            <td class="col-2">${dataInicio} ${horaInicio}</td>
-                            <td class="col-2">${dataTermino} ${horaTermino}</td>
-                            <td class="col-2">Status</td>
-                            <td class="col-1">Alterar</td>`;
+        // Atualizar a tabela de tarefas na página
+        atualizarTabelaTarefas();
 
         // Fechar o modal após criar a tarefa
         var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
         myModal.hide();
+    } else {
+        console.error('Usuário não encontrado na lista de usuários.');
     }
+}
+
+    
+// Alteração em atualizarTabelaTarefas()
+function atualizarTabelaTarefas() {
+    var usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+    var usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+
+    var usuario = usuarios.find(function (user) {
+        return user.email === usuarioLogado.email;
+    });
+
+    if (usuario) {
+        var tableBody = document.getElementById('tarefasTableBody');
+        tableBody.innerHTML = ''; // Limpar tabela antes de atualizar
+
+        usuario.tarefas.forEach(function (tarefa) {
+            var newRow = tableBody.insertRow();
+            newRow.innerHTML = `<td class="col-5"><a class="text-white" href="#" onclick="exibirDescricao('${tarefa.titulo}', '${tarefa.descricao}')" data-bs-toggle="modal" data-bs-target="#exampleModal">${tarefa.titulo}</a></td>
+                                 <td class="col-2">${tarefa.dataInicio} ${tarefa.horaInicio}</td>
+                                 <td class="col-2">${tarefa.dataTermino} ${tarefa.horaTermino}</td>
+                                 <td class="col-2">${tarefa.status}</td>
+                                 <td class="col-1">
+                                     <button class="btn btn-primary" onclick="pageEditTask(${tarefa.id})">Alterar</button>
+                                 </td>`;
+        });
+    } else {
+        console.error('Usuário não encontrado na lista de usuários.');
+    }
+    
+}
 
     // Função para exibir a descrição no modal
     function exibirDescricao(titulo, descricao) {
-        document.getElementById('modalDescricao').innerHTML = `<h1>${titulo}</h1><p>${descricao}</p>`;
+        document.getElementById('exampleModalLabel').innerHTML = `<h1>${titulo}</h1>`;
+        document.getElementById('modalDescricao').innerHTML = `<p>${descricao}</p>`;        
     }
 
-    atualizarTextoNavbar();
+    // Função para fazer logout
+    function fazerLogout() {
+    // Remover o usuário logado do localStorage
+    localStorage.removeItem('usuarioLogado');
+
+    // Redirecionar para a página de login (index.html)
+    window.location.href = 'index.html';
+    }
+    
+// Alteração na função alterarTarefa()
+function alterarTarefa(titulo) {
+    var usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+    var usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+
+    var usuario = usuarios.find(function (user) {
+        return user.email === usuarioLogado.email;
+    });
+
+    if (usuario) {
+        // Encontrar a tarefa pelo título
+        var tarefa = usuario.tarefas.find(function (t) {
+            return t.titulo === titulo;
+        });
+
+        if (tarefa) {
+            // Preencher o formulário no modal com os dados da tarefa
+            document.getElementById('inputTarefaModal').value = tarefa.titulo;
+            document.getElementById('inputDataInicioModal').value = tarefa.dataInicio;
+            document.getElementById('inputHoraInicioModal').value = tarefa.horaInicio;
+            document.getElementById('inputDataTerminoModal').value = tarefa.dataTermino;
+            document.getElementById('inputHoraTerminoModal').value = tarefa.horaTermino;
+            document.getElementById('inputDescricaoModal').value = tarefa.descricao;
+
+            // Exibir os botões de ação no modal
+            document.getElementById('btnAlterar').style.display = 'block';
+            document.getElementById('btnRemover').style.display = 'block';
+            document.getElementById('btnMarcarRealizada').style.display = tarefa.status === 'Pendente' ? 'block' : 'none';
+            document.getElementById('btnMarcarNaoRealizada').style.display = tarefa.status === 'Realizada' ? 'block' : 'none';
+            document.getElementById('btnCancelar').style.display = 'block';
+
+            // Exibir o modal
+            var myModal = new bootstrap.Modal(document.getElementById('modalAlterarTarefa'));
+            myModal.show();
+        } else {
+            console.error('Tarefa não encontrada.');
+        }
+    } else {
+        console.error('Usuário não encontrado na lista de usuários.');
+    }
+}
+
+// Função para preencher corretamente o formulário no modal após clicar em "Alterar"
+function preencherFormularioNoModal() {
+    // Preencher os campos do formulário no modal
+    document.getElementById('inputTarefaModal').value = tarefa.titulo;
+    document.getElementById('inputDataInicioModal').value = tarefa.dataInicio;
+    document.getElementById('inputHoraInicioModal').value = tarefa.horaInicio;
+    document.getElementById('inputDataTerminoModal').value = tarefa.dataTermino;
+    document.getElementById('inputHoraTerminoModal').value = tarefa.horaTermino;
+    document.getElementById('inputDescricaoModal').value = tarefa.descricao;
+}
+
+// Alteração na função alterarTarefaSubmit()
+function alterarTarefaSubmit() {
+    // Lógica para alterar a tarefa e atualizar a tabela
+    // ...
+
+    // Ocultar os botões de ação após a conclusão
+    ocultarBotoesAcaoNoModal();
+}
+
+// Função para ocultar os botões de ação no modal
+function ocultarBotoesAcaoNoModal() {
+    document.getElementById('btnAlterar').style.display = 'none';
+    document.getElementById('btnRemover').style.display = 'none';
+    document.getElementById('btnMarcarRealizada').style.display = 'none';
+    document.getElementById('btnMarcarNaoRealizada').style.display = 'none';
+    document.getElementById('btnCancelar').style.display = 'none';
+}
+
+// Alteração nas demais funções relacionadas a alterações no modal
+function removerTarefa() {
+    // Lógica para remover a tarefa e atualizar a tabela
+    // ...
+
+    // Ocultar os botões de ação após a conclusão
+    ocultarBotoesAcaoNoModal();
+}
+
+function marcarComoRealizada() {
+    // Lógica para marcar a tarefa como realizada e atualizar a tabela
+    // ...
+
+    // Ocultar os botões de ação após a conclusão
+    ocultarBotoesAcaoNoModal();
+}
+
+function marcarComoNaoRealizada() {
+    // Lógica para marcar a tarefa como não realizada e atualizar a tabela
+    // ...
+
+    // Ocultar os botões de ação após a conclusão
+    ocultarBotoesAcaoNoModal();
+}
+
+function cancelarAcao() {
+    // Limpar o formulário e ocultar os botões de ação
+    document.getElementById('inputTarefaModal').value = '';
+    document.getElementById('inputDataInicioModal').value = '';
+    document.getElementById('inputHoraInicioModal').value = '';
+    document.getElementById('inputDataTerminoModal').value = '';
+    document.getElementById('inputHoraTerminoModal').value = '';
+    document.getElementById('inputDescricaoModal').value = '';
+
+    ocultarBotoesAcaoNoModal();
+}
+
+// Edit starting function
+function pageEditTask(id) {
+    var usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+    var usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+
+    var usuario = usuarios.find(function (user) {
+        return user.email === usuarioLogado.email;
+    });
+    
+    if (usuario) {
+        // Encontrar a tarefa pelo título
+        var tarefa = usuario.tarefas.find(function (item) {
+            return item.id === id;
+        });
+
+        if (tarefa) {
+            const taskDetails = {
+                id: tarefa.id,
+                titulo: tarefa.titulo,
+                dataInicio: tarefa.dataInicio,
+                dataTermino: tarefa.dataTermino,
+                horaInicio: tarefa.horaInicio,
+                horaTermino: tarefa.horaTermino,
+                descricao: tarefa.descricao,
+                status: tarefa.status
+            };
+
+            const idTarefaAtual = {
+                id: tarefa.id
+            };
+
+            const currentTaskIndexString = JSON.stringify(idTarefaAtual);
+            localStorage.setItem("editTaskIndex", currentTaskIndexString);
+
+            const taskDetailsString = JSON.stringify(taskDetails);
+            localStorage.setItem("editTask", taskDetailsString);
+
+            window.location.replace("/editTask.html");
+        } else {
+            console.error('Tarefa não encontrada.');
+        }
+    } else {
+        console.error('Usuário não encontrado na lista de usuários.');
+    }
+}
+
+
+atualizarTextoNavbar();
+atualizarTabelaTarefas();

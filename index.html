@@ -18,31 +18,31 @@
                 <img src="image-tarefas.jpg" alt="" class="img-fluid">
             </div>
             <div class="col text-start">
-                <form">
+                <form onsubmit="fazerLogin(event)">
                     <p>Acesse Sua Conta:</p>
                     <div class="mb-3">
-                        <input type="text" id="loginEmail" class="form-control" placeholder="E-mail">
+                        <input required type="email" id="loginEmail" class="form-control" placeholder="E-mail">
                     </div>
                     <div class="mb-3">
-                        <input type="password" id="loginSenha" class="form-control" placeholder="Senha">
+                        <input required type="password" id="loginSenha" class="form-control" placeholder="Senha">
                     </div>
                     <div class="mb-3 col-1">
-                        <button  onclick="fazerLogin(event)" type="submit" class="btn btn-primary">Entrar</button>
+                        <button type="submit" class="btn btn-primary">Entrar</button>
                     </div>
                 </form>
                 <p class="mt-4">Novo por aqui? Crie sua conta:</p>
-                <form>
+                <form onsubmit="criarUsuario(event)">
                     <div class="mb-3">
-                        <input type="text" id="nomeUsuario" class="form-control" placeholder="Nome">
+                        <input required type="text" id="nomeUsuario" class="form-control" placeholder="Nome">
                     </div>
                     <div class="mb-3">
-                        <input type="text" id="cadastroEmail" class="form-control" placeholder="E-mail">
+                        <input required type="email" id="cadastroEmail" class="form-control" placeholder="E-mail">
                     </div>
                     <div class="mb-3">
-                        <input type="password" id="cadastroSenha" class="form-control" placeholder="Senha">
+                        <input required type="password" id="cadastroSenha" class="form-control" placeholder="Senha">
                     </div>
                     <div class="mb-3 col-3">
-                        <button onclick="criarUsuario()" type="submit" class="btn btn-primary">Criar conta</button>
+                        <button type="submit" class="btn btn-primary">Criar conta</button>
                     </div>
                 </form>
             </div>

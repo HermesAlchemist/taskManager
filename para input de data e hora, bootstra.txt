@@ -1,4 +1,0 @@
-para input de data e hora, bootstrap ajuda
-
-type="date"
-type="time"
