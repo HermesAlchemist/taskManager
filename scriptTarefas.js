@@ -1,4 +1,5 @@
 var tarefa = JSON.parse(localStorage.getItem('editTask'));
+console.log(tarefa)
 
 // Preencher o formulário no modal com os dados da tarefa
 document.getElementById('inputTarefa').value = tarefa.titulo;
@@ -32,6 +33,9 @@ function alterarTarefaSubmit() {
     var tarefa = usuarioExistente.tarefas.find(function (task) {
         return task.id === idTarefa;
     });
+
+    // Atualizar o status da tarefa com base nas novas datas
+    tarefa.status = getStatusTarefaDois(tarefa);
 
     // Atualizar os dados da tarefa
     tarefa.titulo = novoTitulo;
@@ -87,48 +91,28 @@ function cancelarAcao() {
 }
 
 function trocarBotoes() {
-    console.log(tarefa.status)
     if (tarefa.status === "Realizada") {
         document.getElementById("btn-realizada").classList.add("d-none");
-        document.getElementById("btnMarcarNaoRealizada").classList.add("d-inline");
+        document.getElementById("btn-NaoRealizada").classList.remove("d-none");
     } else {
-        document.getElementById("btnMarcarNaoRealizada").classList.add("d-none");
-        document.getElementById("btn-realizada").classList.add("d-inline");
+        document.getElementById("btn-NaoRealizada").classList.add("d-none");
+        document.getElementById("btn-realizada").classList.remove("d-none");
     }
 }
 
+// Função para marcar a tarefa como realizada
 function marcarComoRealizada() {
-    // Obter o título da tarefa
-    var tituloTarefa = document.getElementById('inputTarefa').value;
-
-    // Obter o ID da tarefa a ser marcada como realizada
     var idTarefa = JSON.parse(localStorage.getItem('editTaskIndex')).id;
-
-    // Obter o usuário logado
     var usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
-    
-    // Obter a lista de usuários da localStorage
     var usuarios = JSON.parse(localStorage.getItem('usuarios'));
 
-    // Encontrar o usuário correto
-    var usuarioExistente = usuarios.find(function (user) {
-        return user.email === usuarioLogado.email;
-    });
-
-    // Encontrar a tarefa dentro do usuário
-    var tarefa = usuarioExistente.tarefas.find(function (task) {
-        return task.id === idTarefa;
-    });
+    var usuarioExistente = usuarios.find(user => user.email === usuarioLogado.email);
+    var tarefa = usuarioExistente.tarefas.find(task => task.id === idTarefa);
 
     if (tarefa) {
-        // Atualizar o status da tarefa para 'Realizada'
-        tarefa.status = 'text-realizada';
-
-        // Atualizar os dados do usuário no localStorage
+        tarefa.status = 'Realizada';
         localStorage.setItem('usuarios', JSON.stringify(usuarios));
-
-        // Redirecionar para a página de tarefas ou fazer qualquer outra ação necessária
-        window.location.href = "/logged.html";
+        window.location.href = "/logged.html"; // Redireciona e atualiza a tabela
     } else {
         console.error('Tarefa não encontrada.');
     }
@@ -136,49 +120,28 @@ function marcarComoRealizada() {
 
 // Função para marcar a tarefa como não realizada
 function marcarComoNaoRealizada() {
-    // Obter o ID da tarefa a ser marcada como não realizada
     var idTarefa = JSON.parse(localStorage.getItem('editTaskIndex')).id;
-
-    // Obter o usuário logado
-    const userLogged = JSON.parse(localStorage.getItem('usuarioLogado')).email;
-
-    // Obter a lista de usuários da localStorage
+    var userLogged = JSON.parse(localStorage.getItem('usuarioLogado')).email;
     var usuarios = JSON.parse(localStorage.getItem('usuarios'));
 
-    // Encontrar o usuário correto
-    var usuarioExistente = usuarios.find(function (user) {
-        return user.email === userLogged;
-    });
+    var usuarioExistente = usuarios.find(user => user.email === userLogged);
+    var tarefa = usuarioExistente.tarefas.find(task => task.id === idTarefa);
 
-    // Encontrar a tarefa dentro do usuário
-    var tarefa = usuarioExistente.tarefas.find(function (task) {
-        return task.id === idTarefa;
-    });
-
-    // Atualizar o status da tarefa com base no momento atual
-    tarefa.status = getStatusTarefa(tarefa);
-
-    // Atualizar o array de tarefas do usuário
-    usuarioExistente.tarefas = usuarioExistente.tarefas.map(function (task) {
-        return task.id === idTarefa ? tarefa : task;
-    });
-
-    // Atualizar o array de usuários na localStorage
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
-
-    // Atualizar a página para a página de tarefas
-    window.location.href = "/logged.html";
+    if (tarefa) {
+        tarefa.status = getStatusTarefaDois(tarefa); // Redefine o status baseado nas datas
+        localStorage.setItem('usuarios', JSON.stringify(usuarios));
+        window.location.href = "/logged.html";
+    } else {
+        console.error('Tarefa não encontrada.');
+    }
 }
 
-// Função para obter o status da tarefa
-function getStatusTarefa(tarefa) {
+function getStatusTarefaDois(tarefa) {
     var momentoAtual = new Date();
     var dataInicio = new Date(tarefa.dataInicio + 'T' + tarefa.horaInicio);
     var dataTermino = new Date(tarefa.dataTermino + 'T' + tarefa.horaTermino);
 
-    if (tarefa.status === 'text-realizada') {
-        return 'Realizada';
-    } else if (momentoAtual > dataTermino) {
+    if (momentoAtual > dataTermino) {
         return 'Em atraso';
     } else if (momentoAtual < dataInicio) {
         return 'Pendente';

@@ -107,7 +107,7 @@ function criarTarefa(event) {
     var dataTerminoCompleta = new Date(`${dataTermino}T${horaTermino}`);
 
     if (dataTerminoCompleta <= dataInicioCompleta) {
-        alert('O horário de término da sua tarefa é menor que o horário de começo. Verifique o horário de término.');
+        alert('O horário de final da sua tarefa é menor que o horário inicial. Verifique o horário de finalização da tarefa.');
         return;
     }
     
@@ -129,8 +129,8 @@ function criarTarefa(event) {
         horaInicio: horaInicio,
         dataTermino: dataTermino,
         horaTermino: horaTermino,
-        status: `${getStatusTarefa(tarefa)}`,
-        id: Math.random()*1000000
+        status: `${getStatusTarefa(tarefa)}`,  // Status inicial como 'Pendente'
+        id: Math.random() * 1000000
     };
 
         // Adicionar a nova tarefa à lista de tarefas do usuário
@@ -169,6 +169,8 @@ function atualizarTabelaTarefas() {
         tableBody.innerHTML = ''; // Limpar tabela antes de atualizar
 
         usuario.tarefas.forEach(function (tarefa) {
+            // Atualizar o status da tarefa antes de adicioná-la à tabela
+        tarefa.status = getStatusTarefa(tarefa);
             var newRow = tableBody.insertRow();
 
             newRow.innerHTML = `<td class="col"><a href="#" style="color: white;" onclick="exibirDescricao('${tarefa.titulo}', '${tarefa.descricao}')" data-bs-toggle="modal" data-bs-target="#exampleModal">${tarefa.titulo}</a></td>
@@ -182,6 +184,8 @@ function atualizarTabelaTarefas() {
     } else {
         console.error('Usuário não encontrado na lista de usuários.');
     }
+        // Não esqueça de salvar as alterações no localStorage
+        localStorage.setItem('usuarios', JSON.stringify(usuarios));
 }
 
 // Função para obter o status da tarefa
@@ -190,56 +194,34 @@ function getStatusTarefa(tarefa) {
     var dataInicio = new Date(tarefa.dataInicio + 'T' + tarefa.horaInicio);
     var dataTermino = new Date(tarefa.dataTermino + 'T' + tarefa.horaTermino);
 
-    var status;
-
-    if (tarefa.status === 'text-realizada') {
-        status = 'Realizada';
+    if (tarefa.status === 'Realizada') {
+        return 'Realizada';
     } else if (momentoAtual > dataTermino) {
-        status = 'Em atraso';
+        return 'Em atraso';
     } else if (momentoAtual < dataInicio) {
-        status = 'Pendente';
+        return 'Pendente';
     } else {
-        status = 'Em andamento';
+        return 'Em andamento';
     }
-
-    // Atualizar a localStorage com o novo status
-    var usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
-    var usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
-    var usuario = usuarios.find(function (user) {
-        return user.email === usuarioLogado.email;
-    });
-
-    if (usuario) {
-        var tarefaAtualizada = usuario.tarefas.find(function (t) {
-            return t.titulo === tarefa.titulo;
-        });
-
-        if (tarefaAtualizada) {
-            tarefaAtualizada.status = status;
-            localStorage.setItem('usuarios', JSON.stringify(usuarios));
-        }
-    }
-
-    return status;
 }
 
 // Função para obter a classe correspondente ao status
 function getStatusTarefaClass(tarefa) {
-    var momentoAtual = new Date();
-    var dataInicio = new Date(tarefa.dataInicio + 'T' + tarefa.horaInicio);
-    var dataTermino = new Date(tarefa.dataTermino + 'T' + tarefa.horaTermino);
-
-
-    if (tarefa.status === 'text-realizada') {
-        return 'text-success';
-    } else if (momentoAtual > dataTermino) {
-        return 'text-danger';
-    } else if (momentoAtual < dataInicio) {
-        return 'text-warning';
-    } else {
-        return 'text-primary';
-    }  
+    var status = getStatusTarefa(tarefa);
+    switch (status) {
+        case 'Realizada':
+            return 'text-success';
+        case 'Em atraso':
+            return 'text-danger';
+        case 'Pendente':
+            return 'text-warning';
+        case 'Em andamento':
+            return 'text-primary';
+        default:
+            return '';
+    }
 }
+
 
 
     // Função para exibir a descrição no modal
@@ -284,8 +266,8 @@ function alterarTarefa(titulo) {
             // Exibir os botões de ação no modal
             document.getElementById('btnAlterar').style.display = 'block';
             document.getElementById('btnRemover').style.display = 'block';
-            document.getElementById('btnMarcarRealizada').style.display = tarefa.status === 'Pendente' ? 'block' : 'none';
-            document.getElementById('btnMarcarNaoRealizada').style.display = tarefa.status === 'Realizada' ? 'block' : 'none';
+            document.getElementById('btn-Realizada').style.display = tarefa.status === 'Pendente' ? 'block' : 'none';
+            document.getElementById('btn-NaoRealizada').style.display = tarefa.status === 'Realizada' ? 'block' : 'none';
             document.getElementById('btnCancelar').style.display = 'block';
 
             // Exibir o modal
