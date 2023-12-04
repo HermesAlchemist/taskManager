@@ -140,7 +140,6 @@ function criarTarefa(event) {
         console.error('Usuário não encontrado na lista de usuários.');
     }
 }
-
     
 // Alteração em atualizarTabelaTarefas()
 function atualizarTabelaTarefas() {
@@ -157,10 +156,11 @@ function atualizarTabelaTarefas() {
 
         usuario.tarefas.forEach(function (tarefa) {
             var newRow = tableBody.insertRow();
+
             newRow.innerHTML = `<td class="col-5"><a class="text-white" href="#" onclick="exibirDescricao('${tarefa.titulo}', '${tarefa.descricao}')" data-bs-toggle="modal" data-bs-target="#exampleModal">${tarefa.titulo}</a></td>
                                  <td class="col-2">${tarefa.dataInicio} ${tarefa.horaInicio}</td>
                                  <td class="col-2">${tarefa.dataTermino} ${tarefa.horaTermino}</td>
-                                 <td class="col-2">${tarefa.status}</td>
+                                 <td class="col-2 element-pai">${getStatusTarefa(tarefa)}</td>
                                  <td class="col-1">
                                      <button class="btn btn-primary" onclick="pageEditTask(${tarefa.id})">Alterar</button>
                                  </td>`;
@@ -168,8 +168,26 @@ function atualizarTabelaTarefas() {
     } else {
         console.error('Usuário não encontrado na lista de usuários.');
     }
-    
 }
+
+// Função para obter o status da tarefa
+function getStatusTarefa(tarefa) {
+    var momentoAtual = new Date();
+    var dataInicio = new Date(tarefa.dataInicio + 'T' + tarefa.horaInicio);
+    var dataTermino = new Date(tarefa.dataTermino + 'T' + tarefa.horaTermino);
+    if (tarefa.status === true) {
+        const paragrafo = document.createElement(`p`)
+        paragrafo.classList.add(`text-success`)
+        return paragrafo;
+    } else if (momentoAtual > dataTermino) {
+        return 'Em-atraso';
+    } else if (momentoAtual < dataInicio) {
+        return 'Pendente';
+    } else {
+        return 'Em-andamento';
+    }
+}
+
 
     // Função para exibir a descrição no modal
     function exibirDescricao(titulo, descricao) {
