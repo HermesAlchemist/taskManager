@@ -51,7 +51,7 @@ function alterarTarefaSubmit() {
 
     // Atualizar a página para a página de tarefas
     window.location.href="/logged.html"
-    console.log(tarefa);
+
 }
 
 // Função para remover a tarefa
@@ -84,6 +84,17 @@ function removerTarefa() {
 
 function cancelarAcao() {
     window.location.href="/logged.html"
+}
+
+function trocarBotoes() {
+    console.log(tarefa.status)
+    if (tarefa.status === "Realizada") {
+        document.getElementById("btn-realizada").classList.add("d-none");
+        document.getElementById("btnMarcarNaoRealizada").classList.add("d-inline");
+    } else {
+        document.getElementById("btnMarcarNaoRealizada").classList.add("d-none");
+        document.getElementById("btn-realizada").classList.add("d-inline");
+    }
 }
 
 function marcarComoRealizada() {
@@ -175,3 +186,5 @@ function getStatusTarefa(tarefa) {
         return 'Em andamento';
     }
 }
+
+trocarBotoes();

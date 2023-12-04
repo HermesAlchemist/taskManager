@@ -101,7 +101,16 @@ function criarTarefa(event) {
     var dataTermino = document.getElementById('inputDataTermino').value;
     var horaTermino = document.getElementById('inputHoraTermino').value;
     var descricao = document.getElementById('inputDescricao').value;
+    
+    // Validar se a data de término é posterior à data de início
+    var dataInicioCompleta = new Date(`${dataInicio}T${horaInicio}`);
+    var dataTerminoCompleta = new Date(`${dataTermino}T${horaTermino}`);
 
+    if (dataTerminoCompleta <= dataInicioCompleta) {
+        alert('O horário de término da sua tarefa é menor que o horário de começo. Verifique o horário de término.');
+        return;
+    }
+    
     // Obter a lista completa de usuários do localStorage
     var usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
 
@@ -120,7 +129,7 @@ function criarTarefa(event) {
         horaInicio: horaInicio,
         dataTermino: dataTermino,
         horaTermino: horaTermino,
-        status: 'text-pendente', // Inicializa como 'Pendente'
+        status: `${getStatusTarefa(tarefa)}`,
         id: Math.random()*1000000
     };
 
@@ -140,7 +149,12 @@ function criarTarefa(event) {
         console.error('Usuário não encontrado na lista de usuários.');
     }
 }
-    
+
+// FUNÇÃO PARA TRANSFORMAR A DATA
+function brazilianDateFormate(data) {
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
+} 
 // Alteração em atualizarTabelaTarefas()
 function atualizarTabelaTarefas() {
     var usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
@@ -157,32 +171,16 @@ function atualizarTabelaTarefas() {
         usuario.tarefas.forEach(function (tarefa) {
             var newRow = tableBody.insertRow();
 
-            newRow.innerHTML = `<td class="col-5"><a href="#" class="text-white" onclick="exibirDescricao('${tarefa.titulo}', '${tarefa.descricao}')" data-bs-toggle="modal" data-bs-target="#exampleModal">${tarefa.titulo}</a></td>
-                                 <td class="col-2">${tarefa.dataInicio} ${tarefa.horaInicio}</td>
-                                 <td class="col-2">${tarefa.dataTermino} ${tarefa.horaTermino}</td>
-                                 <td class="col-2 ${getStatusTarefa(tarefa)}">${getStatusTarefa(tarefa)}</td>
-                                 <td class="col-1">
-                                     <button class="btn btn-primary" onclick="pageEditTask(${tarefa.id})">Alterar</button>
-                                 </td>`;
-                                conteudoStatus(getStatusTarefa(tarefa))
+            newRow.innerHTML = `<td class="col"><a href="#" style="color: white;" onclick="exibirDescricao('${tarefa.titulo}', '${tarefa.descricao}')" data-bs-toggle="modal" data-bs-target="#exampleModal">${tarefa.titulo}</a></td>
+                                <td class="col" style="font-style: italic;">${brazilianDateFormate(tarefa.dataInicio)} às ${tarefa.horaInicio}</td>
+                                <td class="col" style="font-style: italic;">${brazilianDateFormate(tarefa.dataTermino)} às ${tarefa.horaTermino}</td>
+                                <td class="col ${getStatusTarefaClass(tarefa)}">${getStatusTarefa(tarefa)}</td>
+                                <td class="col">
+                                    <button class="btn btn-primary" onclick="pageEditTask(${tarefa.id})">Alterar</button>
+                                </td>`;
                                 });
     } else {
         console.error('Usuário não encontrado na lista de usuários.');
-    }
-}
-// ConteúdoSTATUS
-function conteudoStatus(status) {
-    switch (status) {
-        case "text-em-andamento":
-            return "Em andamento";
-        case "text-em-atraso":
-            return "Em atraso";
-        case "text-pendente":
-            return "Pendente";
-        case "text-realizada":
-            return "Realizada";
-        default:
-            return "";
     }
 }
 
@@ -192,17 +190,56 @@ function getStatusTarefa(tarefa) {
     var dataInicio = new Date(tarefa.dataInicio + 'T' + tarefa.horaInicio);
     var dataTermino = new Date(tarefa.dataTermino + 'T' + tarefa.horaTermino);
 
+    var status;
+
     if (tarefa.status === 'text-realizada') {
-        return 'Realizada';
+        status = 'Realizada';
     } else if (momentoAtual > dataTermino) {
-        return 'Em atraso';
+        status = 'Em atraso';
     } else if (momentoAtual < dataInicio) {
-        return 'Pendente';
+        status = 'Pendente';
     } else {
-        return 'Em andamento';
+        status = 'Em andamento';
     }
+
+    // Atualizar a localStorage com o novo status
+    var usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+    var usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+    var usuario = usuarios.find(function (user) {
+        return user.email === usuarioLogado.email;
+    });
+
+    if (usuario) {
+        var tarefaAtualizada = usuario.tarefas.find(function (t) {
+            return t.titulo === tarefa.titulo;
+        });
+
+        if (tarefaAtualizada) {
+            tarefaAtualizada.status = status;
+            localStorage.setItem('usuarios', JSON.stringify(usuarios));
+        }
+    }
+
+    return status;
 }
 
+// Função para obter a classe correspondente ao status
+function getStatusTarefaClass(tarefa) {
+    var momentoAtual = new Date();
+    var dataInicio = new Date(tarefa.dataInicio + 'T' + tarefa.horaInicio);
+    var dataTermino = new Date(tarefa.dataTermino + 'T' + tarefa.horaTermino);
+
+
+    if (tarefa.status === 'text-realizada') {
+        return 'text-success';
+    } else if (momentoAtual > dataTermino) {
+        return 'text-danger';
+    } else if (momentoAtual < dataInicio) {
+        return 'text-warning';
+    } else {
+        return 'text-primary';
+    }  
+}
 
 
     // Função para exibir a descrição no modal
@@ -308,6 +345,25 @@ function pageEditTask(id) {
     }
 }
 
+function dataAtual() {
+    var momentoAtual = new Date();
+    
+    // Formatando a data no formato "YYYY-MM-DD"
+    var ano = momentoAtual.getFullYear();
+    var mes = ('0' + (momentoAtual.getMonth() + 1)).slice(-2);
+    var dia = ('0' + momentoAtual.getDate()).slice(-2);
+
+    var dataFormatada = `${ano}-${mes}-${dia}`;
+    
+    document.getElementById('inputDataInicio').setAttribute('min', dataFormatada);
+    var dataInicio = document.getElementById("inputDataInicio")
+    document.getElementById("inputDataTermino").setAttribute('min', `${dataInicio.value}`)
+    return momentoAtual;
+}
+
+
+
 
 atualizarTextoNavbar();
 atualizarTabelaTarefas();
+dataAtual()
