@@ -112,17 +112,17 @@ function criarTarefa(event) {
     });
 
     if (usuario) {
-        // Criar a nova tarefa com status 'Pendente'
-        var novaTarefa = {
-            titulo: tarefa,
-            descricao: descricao,
-            dataInicio: dataInicio,
-            horaInicio: horaInicio,
-            dataTermino: dataTermino,
-            horaTermino: horaTermino,
-            status: false, // Adicionado o status 'Pendente'
-            id: Math.random()*1000000
-        };
+    // Criar a nova tarefa com status 'Pendente'
+    var novaTarefa = {
+        titulo: tarefa,
+        descricao: descricao,
+        dataInicio: dataInicio,
+        horaInicio: horaInicio,
+        dataTermino: dataTermino,
+        horaTermino: horaTermino,
+        status: 'text-pendente', // Inicializa como 'Pendente'
+        id: Math.random()*1000000
+    };
 
         // Adicionar a nova tarefa à lista de tarefas do usuário
         usuario.tarefas.push(novaTarefa);
@@ -157,7 +157,7 @@ function atualizarTabelaTarefas() {
         usuario.tarefas.forEach(function (tarefa) {
             var newRow = tableBody.insertRow();
 
-            newRow.innerHTML = `<td class="col-5 text-white"><a href="#" onclick="exibirDescricao('${tarefa.titulo}', '${tarefa.descricao}')" data-bs-toggle="modal" data-bs-target="#exampleModal">${tarefa.titulo}</a></td>
+            newRow.innerHTML = `<td class="col-5"><a href="#" class="text-white" onclick="exibirDescricao('${tarefa.titulo}', '${tarefa.descricao}')" data-bs-toggle="modal" data-bs-target="#exampleModal">${tarefa.titulo}</a></td>
                                  <td class="col-2">${tarefa.dataInicio} ${tarefa.horaInicio}</td>
                                  <td class="col-2">${tarefa.dataTermino} ${tarefa.horaTermino}</td>
                                  <td class="col-2 ${getStatusTarefa(tarefa)}">${getStatusTarefa(tarefa)}</td>
@@ -170,13 +170,20 @@ function atualizarTabelaTarefas() {
         console.error('Usuário não encontrado na lista de usuários.');
     }
 }
-
+// ConteúdoSTATUS
 function conteudoStatus(status) {
-if (status === "text-em-andamento") {
-    document.querySelector(".text-realizada").forEach(element => {
-        element.innerText = "Realizada";
-    });
-}
+    switch (status) {
+        case "text-em-andamento":
+            return "Em andamento";
+        case "text-em-atraso":
+            return "Em atraso";
+        case "text-pendente":
+            return "Pendente";
+        case "text-realizada":
+            return "Realizada";
+        default:
+            return "";
+    }
 }
 
 // Função para obter o status da tarefa
@@ -185,14 +192,14 @@ function getStatusTarefa(tarefa) {
     var dataInicio = new Date(tarefa.dataInicio + 'T' + tarefa.horaInicio);
     var dataTermino = new Date(tarefa.dataTermino + 'T' + tarefa.horaTermino);
 
-    if (tarefa.status === true) {
-        return 'text-realizada';
+    if (tarefa.status === 'text-realizada') {
+        return 'Realizada';
     } else if (momentoAtual > dataTermino) {
-        return 'text-em-atraso';
+        return 'Em atraso';
     } else if (momentoAtual < dataInicio) {
-        return 'text-pendente';
+        return 'Pendente';
     } else {
-        return 'text-em-andamento';
+        return 'Em andamento';
     }
 }
 

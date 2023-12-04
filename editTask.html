@@ -37,7 +37,7 @@
             <div class="col mx-auto">
                 <button type="submit" class="btn btn-primary me-2" id="btnAlterar" onclick="alterarTarefaSubmit()">Alterar Tarefa</button>
                 <button type="button" class="btn btn-danger me-2" id="btnRemover" onclick="removerTarefa()">Remover Tarefa</button>
-                <button type="button" class="btn btn-success me-2" id="btnMarcarRealizada" onclick="marcarComoRealizada()">Marcar como Realizada</button>
+                <button class="btn btn-success" onclick="marcarComoRealizada('${tarefa.titulo}')">Marcar como Realizada</button>
                 <button type="button" class="btn btn-warning me-2" id="btnMarcarNaoRealizada" onclick="marcarComoNaoRealizada()">Marcar como Não Realizada</button>
                 <button type="button" class="btn btn-secondary me-2" id="btnCancelar" onclick="cancelarAcao()">Cancelar</button>
             </div>
