@@ -63,7 +63,7 @@
             alert('Login feito com sucesso!');
 
             // Redirecionar para a página logada ou outra página, se desejar
-            window.location.href = 'taskManager/logged.html';
+            window.location.href = 'logged.html';
         } else {
             // Login falhou
             alert('Login falhou. Verifique suas credenciais.');
