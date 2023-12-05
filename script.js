@@ -318,7 +318,7 @@ function pageEditTask(id) {
             const taskDetailsString = JSON.stringify(taskDetails);
             localStorage.setItem("editTask", taskDetailsString);
 
-            window.location.replace("/editTask.html");
+            window.location.replace("editTask.html");
         } else {
             console.error('Tarefa não encontrada.');
         }

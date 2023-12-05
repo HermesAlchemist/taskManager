@@ -54,7 +54,7 @@ function alterarTarefaSubmit() {
     localStorage.setItem('usuarios', JSON.stringify(usuarios));
 
     // Atualizar a página para a página de tarefas
-    window.location.href="/logged.html"
+    window.location.href="logged.html"
 
 }
 
@@ -83,11 +83,11 @@ function removerTarefa() {
     localStorage.setItem('usuarios', JSON.stringify(usuarios));
 
     // Redirecionar para a página de tarefas ou fazer qualquer outra ação necessária
-    window.location.href = "/logged.html";
+    window.location.href = "logged.html";
 }
 
 function cancelarAcao() {
-    window.location.href="/logged.html"
+    window.location.href="logged.html"
 }
 
 function trocarBotoes() {
@@ -112,7 +112,7 @@ function marcarComoRealizada() {
     if (tarefa) {
         tarefa.status = 'Realizada';
         localStorage.setItem('usuarios', JSON.stringify(usuarios));
-        window.location.href = "/logged.html"; // Redireciona e atualiza a tabela
+        window.location.href = "logged.html"; // Redireciona e atualiza a tabela
     } else {
         console.error('Tarefa não encontrada.');
     }
@@ -130,7 +130,7 @@ function marcarComoNaoRealizada() {
     if (tarefa) {
         tarefa.status = getStatusTarefaDois(tarefa); // Redefine o status baseado nas datas
         localStorage.setItem('usuarios', JSON.stringify(usuarios));
-        window.location.href = "/logged.html";
+        window.location.href = "logged.html";
     } else {
         console.error('Tarefa não encontrada.');
     }
